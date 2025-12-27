@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Irrigation Connectée</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; }
+        .card { background: white; padding: 20px; margin: 20px auto; width: 300px; border-radius: 10px; shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .status { font-size: 2em; color: #2ecc71; }
+        button { padding: 10px 20px; font-size: 1em; cursor: pointer; background: #3498db; color: white; border: none; border-radius: 5px; }
+        button.off { background: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <h1>Dashboard Irrigation</h1>
+
+    <div class="card">
+        <h3>Humidité du Sol</h3>
+        <div id="humidite" class="status">-- %</div>
+    </div>
+
+    <div class="card">
+        <h3>Contrôle Pompe</h3>
+        <p id="etat-pompe">État : Éteinte</p>
+        <button id="btn-pompe" onclick="togglePompe()">ALLUMER</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+    <script>
+        // Configuration Firebase extraite de ton image
+        const firebaseConfig = {
+            apiKey: "AIzaSyDu2wuE8vs6iVNWyIMOfPieQtxdhUEpamk",
+            authDomain: "irrigation-intelligente-sahel.firebaseapp.com",
+            databaseURL: "https://irrigation-intelligente-sahel-default-rtdb.europe-west1.firebasedatabase.app/",
+            projectId: "irrigation-intelligente-sahel",
+            storageBucket: "irrigation-intelligente-sahel.firebasestorage.app",
+            messagingSenderId: "287915147704",
+            appId: "1:287915147704:web:9a4c3ca3040a5abd8c0f4d"
+        };
+
+        // Initialisation de Firebase (Syntaxe simplifiée)
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // --- LOGIQUE DE LECTURE ---
+        db.ref('jardin/humidite').on('value', (snap) => {
+            const val = snap.val() || 0;
+            document.getElementById('humidite').innerText = val + "%";
+        });
+
+        // --- LOGIQUE DE CONTRÔLE ---
+        function togglePompe() {
+            const ref = db.ref('jardin/pompe');
+            ref.once('value').then(snap => {
+                ref.set(!snap.val());
+            });
+        }
+
+        db.ref('jardin/pompe').on('value', (snap) => {
+            const isOn = snap.val();
+            const btn = document.getElementById('btn-pompe');
+            if(isOn) {
+                btn.innerText = "ARRÊTER L'ARROSAGE";
+                btn.style.background = "#e74c3c";
+            } else {
+                btn.innerText = "ACTIVER L'ARROSAGE";
+                btn.style.background = "#2ecc71";
+            }
+        });
+   </script>
+</body>
+</html>
